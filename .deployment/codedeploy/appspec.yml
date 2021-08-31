@@ -1,0 +1,30 @@
+# this is the AWS appspec file.
+# you can modify here which script should be called in which stage.
+# There are more possible features and hooks as definere here
+# docs: http://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure.html
+version: 0.0
+os: linux
+files:
+  - source: /
+    destination: /data/deploy
+hooks:
+  ApplicationStop:
+    - location: 01_application_stop.sh
+      timeout: 300
+      runas: root
+  BeforeInstall:
+    - location: 02_before_install.sh
+      timeout: 300
+      runas: root
+  AfterInstall:
+    - location: 03_after_install.sh
+      timeout: 3600
+      runas: root
+  ApplicationStart:
+    - location: 04_application_start.sh
+      timeout: 300
+      runas: root
+  ValidateService:
+    - location: 05_verify_service.sh
+      timeout: 300
+      runas: root

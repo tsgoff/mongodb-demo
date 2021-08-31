@@ -1,0 +1,68 @@
+stages:
+  - terraform
+  - codedeploy
+  - terraform-destroy
+
+.validate: &terrraform
+  stage: terraform
+  image: 
+    name: bios/docker-alpine
+    entrypoint:
+      - /usr/bin/env
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"    
+  tags:
+    - docker
+  before_script:
+    - cd $CI_PROJECT_DIR/terraform/env/${ENVIRONMENT}
+    - export ACCOUNT=$(aws sts get-caller-identity | jq -r '.Account')
+    - aws s3 ls tf-state-${ACCOUNT}-$AWS_DEFAULT_REGION || aws s3api create-bucket --bucket tf-state-$ACCOUNT-$AWS_DEFAULT_REGION --region $AWS_DEFAULT_REGION --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
+    - aws s3 ls deploy-bucket-$ACCOUNT-$AWS_DEFAULT_REGION || aws s3api create-bucket --bucket deploy-bucket-$ACCOUNT-$AWS_DEFAULT_REGION --region $AWS_DEFAULT_REGION --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
+    - terraform init -backend-config "bucket=tf-state-$ACCOUNT-eu-west-1"
+  script:
+    - terraform validate && terraform apply -parallelism=1 -auto-approve -var="public_key=${PUBLIC_KEY}"
+
+.destroy: &terrraform-destroy
+  stage: terraform-destroy
+  image: 
+    name: bios/docker-alpine
+    entrypoint:
+      - /usr/bin/env
+      - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"  
+  tags:
+    - docker
+  before_script:
+    - cd $CI_PROJECT_DIR/terraform/env/${ENVIRONMENT}
+    - export ACCOUNT=$(aws sts get-caller-identity | jq -r '.Account')    
+    - terraform init -backend-config "bucket=tf-state-$ACCOUNT-eu-west-1"
+  script:
+    - terraform destroy -auto-approve -var="public_key=${PUBLIC_KEY}"
+  when: manual
+
+.deploy: &deploy
+  stage: deploy
+  image: bios/docker-alpine
+  tags:
+    - docker
+  script:
+    - aws --version
+    - bash -e ./.deployment/deploy.sh
+
+terraform:int:
+  <<: *terrraform
+  stage: terraform
+  variables:
+    ENVIRONMENT: int
+
+deploy:int:
+  <<: *deploy
+  stage: codedeploy
+  variables:
+    ENVIRONMENT: int
+    AWS_ROLE_ARN: ${AWS_ROLE_ARN}
+    AWS_EXTERNAL_ID: ${AWS_EXTERNAL_ID}
+
+terraform-destroy:int:
+  <<: *terrraform-destroy
+  stage: terraform-destroy
+  variables:
+    ENVIRONMENT: int    

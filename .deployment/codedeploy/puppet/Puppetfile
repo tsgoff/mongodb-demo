@@ -1,0 +1,19 @@
+# r10k puppetfile
+# usage tips can be found at:
+# https://github.com/puppetlabs/r10k/blob/master/doc/puppetfile.mkd
+moduledir "external-modules"
+
+mod 'sysctl',
+      :git    => 'https://github.com/thias/puppet-sysctl.git',
+      :tag    => '1.0.6'
+
+mod 'puppetlabs-stdlib', '4.25.0'
+
+mod 'puppetlabs-concat', '4.1.1'
+
+mod 'puppetlabs-translate', '2.2.0'
+
+mod 'puppetlabs-apt', '7.6.0'
+
+mod 'mongodb',
+      :git    => 'https://github.com/voxpupuli/puppet-mongodb.git'

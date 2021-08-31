@@ -1,0 +1,35 @@
+#!/bin/bash
+
+PUPPET_ENVIRONMENT=`/bin/cat /etc/puppet_env`
+PROJECT=`/bin/cat /etc/puppet_project`
+APP=`/bin/cat /etc/puppet_app`
+ADMINPW=`/usr/local/bin/aws ssm get-parameters --with-decryption --names "/${PROJECT}/${APP}/${PUPPET_ENVIRONMENT}/adminpw" --output text --query "Parameters[*].{Value:Value}"`
+
+META=`curl -s http://169.254.169.254/latest/dynamic/instance-identity/document`
+ACCOUNTID=`echo $META | jq -r .accountId`
+REGION=`echo $META | jq -r .region`
+
+DATE=$(date '+%Y%m%d%H%M%S')
+BACKUPDIR="/data/db/backup"
+
+mkdir -p $BACKUPDIR/$DATE
+
+function mongodbbackup {
+  mongodump --username admin --password $ADMINPW --oplog --gzip --out $BACKUPDIR/$DATE > >(tee -a /var/log/mongodbbackup.log) 2> >(tee -a /var/log/mongodbbackup.log >&2)
+}
+
+function backupsync {
+  #/usr/local/bin/aws s3 sync --exact-timestamps $BACKUPDIR s3://arn:aws:s3:$REGION:$ACCOUNTID:accesspoint/$PROJECT-$APP-backup-$PUPPET_ENVIRONMENT/
+  /usr/local/bin/aws s3 sync --exact-timestamps $BACKUPDIR s3://$PROJECT-$APP-backup-$PUPPET_ENVIRONMENT/
+}
+
+if mongodbbackup ; then
+  echo "dump ok"
+  if backupsync ; then
+    echo "s3 sync ok"
+    echo "true" > $BACKUPDIR/state
+    find $BACKUPDIR -mtime +3 -delete
+  fi
+else
+  echo "false" > $BACKUPDIR/state
+fi
