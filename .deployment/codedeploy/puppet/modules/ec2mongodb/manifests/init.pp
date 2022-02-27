@@ -60,7 +60,7 @@ class ec2mongodb {
 
   class { '::mongodb::globals':
     manage_package_repo => true,
-    version             => '5.0.0',
+    version             => '5.0.6',
   } ->
   class { '::mongodb::client': } ->
   class { '::mongodb::server':
