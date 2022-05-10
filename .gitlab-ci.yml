@@ -45,6 +45,7 @@ stages:
     - docker
   script:
     - aws --version
+    - mkdir /tmp i&& chmod +t /tmp
     - bash -e ./.deployment/deploy.sh
 
 terraform:int:
