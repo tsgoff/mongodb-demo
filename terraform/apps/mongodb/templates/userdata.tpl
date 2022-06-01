@@ -77,7 +77,7 @@ defaults:
   datadir: /etc/puppet/hiera" > /etc/puppet/hiera.yaml
 
 #codedeploy agent
-cd /tmp && wget https://aws-codedeploy-eu-west-1.s3.amazonaws.com/latest/install && chmod +x ./install && ./install auto && /etc/init.d/codedeploy-agent start
+cd /tmp && wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install && chmod +x ./install && ./install auto && /etc/init.d/codedeploy-agent start
 
 
 

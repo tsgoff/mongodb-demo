@@ -24,7 +24,7 @@ variable "volume_size" {
 }
 
 variable "region" {
-  default = "eu-west-1"
+  default = "us-east-1"
 }
 
 variable "user_data" {

@@ -5,6 +5,7 @@ resource "aws_instance" "ec2-mongodb" {
   monitoring = true
   vpc_security_group_ids = [ aws_security_group.mongodb.id ]
   subnet_id              = element(coalesce(var.subnet_ids, data.aws_subnet_ids.default.ids), count.index)
+  associate_public_ip_address = true
 
   key_name = "demo-${local.tags.Environment}"
   

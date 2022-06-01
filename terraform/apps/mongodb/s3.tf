@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "backupBucket" {
-  bucket = "${var.tags.Project}-${local.tags.App}-backup-${var.tags.Environment}"
+  bucket = "${var.tags.Project}-${local.tags.App}-backup-${var.tags.Environment}-${data.aws_region.current.name}"
   force_destroy = true
   tags = local.tags
 }

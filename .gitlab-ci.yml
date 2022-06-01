@@ -15,9 +15,9 @@ stages:
   before_script:
     - cd $CI_PROJECT_DIR/terraform/env/${ENVIRONMENT}
     - export ACCOUNT=$(aws sts get-caller-identity | jq -r '.Account')
-    - aws s3 ls tf-state-${ACCOUNT}-$AWS_DEFAULT_REGION || aws s3api create-bucket --bucket tf-state-$ACCOUNT-$AWS_DEFAULT_REGION --region $AWS_DEFAULT_REGION --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
-    - aws s3 ls deploy-bucket-$ACCOUNT-$AWS_DEFAULT_REGION || aws s3api create-bucket --bucket deploy-bucket-$ACCOUNT-$AWS_DEFAULT_REGION --region $AWS_DEFAULT_REGION --create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
-    - terraform init -backend-config "bucket=tf-state-$ACCOUNT-eu-west-1"
+    - aws s3 ls tf-state-${ACCOUNT}-$AWS_DEFAULT_REGION || aws s3api create-bucket --bucket tf-state-$ACCOUNT-$AWS_DEFAULT_REGION --region $AWS_DEFAULT_REGION #--create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
+    - aws s3 ls deploy-bucket-$ACCOUNT-$AWS_DEFAULT_REGION || aws s3api create-bucket --bucket deploy-bucket-$ACCOUNT-$AWS_DEFAULT_REGION --region $AWS_DEFAULT_REGION #--create-bucket-configuration LocationConstraint=$AWS_DEFAULT_REGION
+    - terraform init -backend-config "bucket=tf-state-$ACCOUNT-us-east-1"
   script:
     - terraform validate && terraform apply -parallelism=1 -auto-approve -var="public_key=${PUBLIC_KEY}"
 
@@ -33,7 +33,7 @@ stages:
   before_script:
     - cd $CI_PROJECT_DIR/terraform/env/${ENVIRONMENT}
     - export ACCOUNT=$(aws sts get-caller-identity | jq -r '.Account')    
-    - terraform init -backend-config "bucket=tf-state-$ACCOUNT-eu-west-1"
+    - terraform init -backend-config "bucket=tf-state-$ACCOUNT-us-east-1"
   script:
     - terraform destroy -auto-approve -var="public_key=${PUBLIC_KEY}"
   when: manual
@@ -45,7 +45,7 @@ stages:
     - docker
   script:
     - aws --version
-    - mkdir /tmp i&& chmod +t /tmp
+    - mkdir /tmp && chmod +t /tmp
     - bash -e ./.deployment/deploy.sh
 
 terraform:int:
