@@ -2,7 +2,7 @@
 
 MonngoDB 5.0 Demo on AWS Graviton EC2 instances with GP3 volumes. Deployed with local Puppet apply over CodeDeploy.
 
-Default is 1x t4g.nano. This can be adjusted in ./terraform/env/int/main.tf (instance_count must be odd and max 50)
+Default is 1x c7g.medium. This can be adjusted in ./terraform/env/int/main.tf (instance_count must be odd and max 50)
 
 **Show cluster state:**
 
