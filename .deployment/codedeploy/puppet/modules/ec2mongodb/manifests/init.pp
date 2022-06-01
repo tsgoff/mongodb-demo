@@ -114,6 +114,7 @@ class ec2mongodb {
     after   => 'ExecStartPre',
   } ->
   package { 'mongodb-org-tools': ensure => installed, }
+  package { 'mongodb-mongosh': ensure => installed, }
 
   mongodb_user { monitoring:
     name          => 'monitoring',

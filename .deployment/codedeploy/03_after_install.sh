@@ -50,9 +50,13 @@ else
   echo "secondary or instance already initialized"
 fi
 
+#.mongoshrc.js
+printf "db = connect('localhost/admin', 'admin', '$FACTER_adminpw');" > /root/.mongoshrc.js
+
 #copy .mongorc.js
 for USERS in demo
 do
   cp /root/.mongorc.js /home/${USERS}/
+  cp /root/.mongoshrc.js /home/${USERS}/
   chown -R ${USERS}:${USERS} /home/${USERS}/
 done
